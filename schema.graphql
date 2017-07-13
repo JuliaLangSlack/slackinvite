@@ -1,0 +1,59 @@
+enum AuthLevel {
+  USER
+  ADMIN
+}
+
+type Name {
+  first: String
+  last: String
+}
+
+type User {
+  id: ID
+  email: String
+  name: Name
+  level: AuthLevel
+}
+
+enum InviteStatus {
+  ACCEPTED
+  DENIED
+  PENDING
+}
+
+type Status {
+  code: Int
+  msg: String
+}
+
+type InviteRequest {
+  id: ID
+  email: String
+  name: Name
+  comment: String
+  status: InviteStatus
+  github: String
+}
+
+type RequestList {
+  requests: [InviteRequest]
+  are_more: Boolean
+  cursor: String
+}
+
+type Query {
+  getRequests(start:String, max:Int): RequestList
+  getRequest(id: ID): InviteRequest
+  num_requests: Int
+  getUser(id: ID): User
+  getUserByEmail(email: String): User
+}
+
+type RequestStatus {
+  request: InviteRequest
+  status: Status
+}
+
+type Mutation {
+  addRequest(email:String, first:String, last:String, github:String) : RequestStatus
+}

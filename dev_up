@@ -1,0 +1,5 @@
+#!/bin/bash
+
+npm run build &
+npm run bundle &
+docker-compose -f stack-dev.yml up --build
