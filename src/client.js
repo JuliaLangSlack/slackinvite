@@ -10,6 +10,52 @@ const client = new ApolloClient()
 class Main extends React.Component {
   constructor() {
     super()
+  }
+
+  render() {
+    const page = this.props.page
+    let inner_content = null
+
+    if(page == 'invite_request') {
+      inner_content = <InviteRequest/>
+    } else if(page == 'review') {
+      inner_content = <ReviewInvites/>
+    }
+    return <div>
+      <div className='container main'>
+
+        <div className='logo'>
+          <a href="http://julialang.org"><img src="/assets/Julia_prog_language.svg"/></a>
+        </div>
+
+        {inner_content}
+      <Footer/>
+      </div>
+    </div>
+  }
+}
+
+Main.defaultProps = {page: 'invite_request'}
+
+class Footer extends React.Component {
+  render() {
+    return <ul className='nav nav-tabs'>
+      <li><a href="/login">Login</a></li>
+    </ul>
+  }
+}
+
+class ReviewInvites extends React.Component {
+  render() {
+    return <div>
+      admin
+    </div>
+  }
+}
+
+class InviteRequest extends React.Component {
+  constructor() {
+    super()
     this.state = {email: '', first: '', last: '', github: '',
                   status: 'neutral', 'coc': false, msg: ''}
     this.onChange = this.onChange.bind(this)
@@ -55,10 +101,8 @@ class Main extends React.Component {
     } else if(status == 'fail') {
       statusMsg = <div className='alert alert-danger'>{this.state.msg}</div>
     }
-    return <div className='container main'>
-      <div className='logo'>
-        <a href="http://julialang.org"><img src="/assets/Julia_prog_language.svg"/></a>
-      </div>
+    return <div>
+
       <h1>Slack invite request</h1>
       {statusMsg}
       <form className='form' onSubmit={this.onSubmit}>
@@ -117,14 +161,14 @@ class Root extends React.Component {
   render() {
     return <div>
       <ApolloProvider client={client}>
-          <Main/>
+          <Main page={this.props.page}/>
       </ApolloProvider>
     </div>
   }
 }
 
 function mount_react() {
-  ReactDOM.render(<Root/>, document.getElementById('root'))
+  ReactDOM.render(<Root page='invite_request'/>, document.getElementById('root'))
   console.log(`Ready`)
 }
 

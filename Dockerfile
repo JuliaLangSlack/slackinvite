@@ -9,6 +9,6 @@ COPY yarn.lock package.json ./
 RUN yarn install
 COPY assets ./assets
 COPY lib ./lib
-COPY schema.graphql main.html .foreverignore ./
+COPY schema.graphql main.html ./
 
 CMD npm run serve
