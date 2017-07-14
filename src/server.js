@@ -80,7 +80,7 @@ async function init() {
   Auth.set_connection(connection)
 
   console.log('Creating tables')
-  await ensure_tables(['invites', 'sessions', 'status_changes'])
+  await ensure_tables(['invites', 'sessions', 'status_changes', 'admins'])
   console.log('Done')
 
 

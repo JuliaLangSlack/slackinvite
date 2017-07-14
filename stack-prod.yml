@@ -12,6 +12,8 @@ services:
       - frontend
     depends_on:
       - db
+    volumes:
+      - "/slackinvite_secrets:/secrets"
   db:
     image: rethinkdb:2.3.5
     deploy:
