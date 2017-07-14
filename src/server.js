@@ -1,6 +1,6 @@
 import express from 'express'
 import graphqlHTTP from 'express-graphql'
-import {buildSchema} from 'graphql'
+import {buildSchema, graphql} from 'graphql'
 import fs from 'fs'
 import compression from 'compression'
 import r from 'rethinkdb'
@@ -9,12 +9,16 @@ import bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
 import request from 'request'
 import sjcl from 'sjcl'
+import pug from 'pug'
+import schema from './schema'
+import Auth from './auth'
+import Email from './email'
 
-async function load_schema() {
-  let schema_text = fs.readFileSync('./schema.graphql', 'utf8')
-  let schema = await buildSchema(schema_text);
-  return schema
-}
+// async function load_schema() {
+//   let schema_text = fs.readFileSync('./schema.graphql', 'utf8')
+//   let schema = await buildSchema(schema_text);
+//   return schema
+// }
 
 let connection = null
 
@@ -47,10 +51,19 @@ function load_secrets() {
   return decoded
 }
 
-async function init() {
-  const schema = await load_schema();
-  const secrets = load_secrets()
+function load_template(name, options) {
+  if(options==null) {
+    options = {}
+  }
+  if(options.user == null) {
+    options.user = '{}'
+  }
+  return pug.renderFile(`./templates/${name}.jade`, options)
+}
 
+async function init() {
+  const secrets = load_secrets()
+  Email.init(secrets.email)
   while (true) {
     try {
       connection = await r.connect({host: 'db', port: 28015})
@@ -60,49 +73,26 @@ async function init() {
       await timeout(1000)
     }
   }
+  Auth.set_connection(connection)
 
-  await ensure_tables(['invites', 'sessions'])
+  await ensure_tables(['invites', 'sessions', 'status_changes'])
 
-  let root = {
-    addRequest: async({email, first, last, github}) => {
-      const n_prev_users = await r.table('invites')('email').count(email).run(connection)
-      if (n_prev_users == 0) {
-        const res = await r.table('invites').insert({email, first, last, github, status: 'PENDING'}).run(connection)
-        const status = {
-          code: 0,
-          msg: 'Success'
-        }
-        const id = res.generated_keys[0]
-        const request = {
-          email: email,
-          name: {
-            first: first,
-            last: last
-          },
-          github: github,
-          comment: '',
-          id: id
-        }
-        return {request, status}
-      } else {
-        return {
-          status: {
-            code: -1,
-            msg: 'Another invite associated with that email is already pending.'
-          }
-        }
-      }
-    }
-  }
+
+
 
   let app = express()
   app.use(compression())
   app.use(cookieParser())
 
+  app.use((req, res, next) => {
+    req.connection = connection
+    next()
+  })
+
   app.use(async(req, res, next) => {
     let session = req.cookies['session']
 
-    if (session == null) {
+    if (session == null || session == '') {
       session = gen_session_key()
       res.cookie('session', session)
     }
@@ -111,29 +101,46 @@ async function init() {
     let users = await user_cursor.toArray()
     if (users.length > 0) {
       req.user = users[0]
-      console.log('Request from user ', req.user)
+      req.user.is_admin = await Auth.review_authorized(req.user)
+      next()
     }
-    next()
   })
+  //
+  // app.use('/graphql', bodyParser.json())
+  //
+  // app.use('/graphql', (req, res, next) => {
+  //   console.log(`GQL query: ${JSON.stringify(req.body)}`)
+  //   next()
+  // })
 
-  app.use('/graphql', bodyParser.json())
+  app.use('/graphql', graphqlHTTP((request, response, params)=>{
+    return {
+      schema: schema,
+      graphiql: true}
+  }))
 
-  app.use('/graphql', (req, res, next) => {
-    console.log(`GQL query: ${JSON.stringify(req.body)}`)
-    next()
-  })
-
-  app.use('/graphql', graphqlHTTP({schema: schema, rootValue: root, graphiql: true}))
 
   app.get('/', async(req, res) => {
-    let html = fs.readFileSync('./main.html', 'utf8')
-    res.send(html)
+    res.send(load_template('main', {page: 'invite_request', user: JSON.stringify(req.user)}))
   })
 
   app.get('/login', (req, res) => {
     const query_string = `scope=user:email&client_id=${secrets.github.client_id}`
     const url = `https://github.com/login/oauth/authorize?${query_string}`
     res.redirect(url)
+  })
+
+  app.get('/review', async (req, res)=>{
+    if (await Auth.review_authorized(req.user)) {
+      res.send(load_template('main', {page: 'review', user: JSON.stringify(req.user)}))
+    } else {
+      res.redirect('/')
+    }
+  })
+
+  app.get('/logout', (req, res)=>{
+    res.cookie('session', '')
+    res.redirect('/')
   })
 
   app.get('/oauth_callback', (req, res) => {
@@ -183,15 +190,18 @@ async function init() {
           }
           if (user == null) {
             await r.table('sessions').insert(record).run(connection)
+            res.redirect('/')
           } else {
             await r.table('sessions').get(user.id).update(record).run(connection)
+            res.redirect('/')
           }
         })
       } catch (err) {
         console.log('Error getting access token: ', err)
         console.log('Body was ', body)
+        res.redirect('/')
       }
-      res.redirect('/')
+
     })
   })
 

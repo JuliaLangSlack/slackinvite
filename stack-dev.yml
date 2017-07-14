@@ -17,6 +17,7 @@ services:
       - "${HOME}/gql/lib:/app/lib"
       - "${HOME}/gql/assets:/app/assets"
       - "${HOME}/tmp/logs:/logs"
+      - "${HOME}/gql/templates:/app/templates"
       - "${HOME}/tmp/secrets:/secrets"
   db:
     image: rethinkdb:2.3.5

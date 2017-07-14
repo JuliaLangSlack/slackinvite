@@ -35,18 +35,8 @@ type InviteRequest {
   github: String
 }
 
-type RequestList {
-  requests: [InviteRequest]
-  are_more: Boolean
-  cursor: String
-}
-
 type Query {
-  getRequests(start:String, max:Int): RequestList
-  getRequest(id: ID): InviteRequest
-  num_requests: Int
-  getUser(id: ID): User
-  getUserByEmail(email: String): User
+  getRequests(): [InviteRequest]
 }
 
 type RequestStatus {
@@ -56,4 +46,5 @@ type RequestStatus {
 
 type Mutation {
   addRequest(email:String, first:String, last:String, github:String) : RequestStatus
+  changeRequestStatus(id:ID, status:RequestStatus): RequestStatus
 }

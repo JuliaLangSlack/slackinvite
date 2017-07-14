@@ -1,5 +1,5 @@
 .main {
-  max-width: 800px;
+  max-width: 1200px;
 }
 
 .logo {
@@ -9,4 +9,13 @@
 
 .coc {
   margin-left: 10px;
+}
+
+.header {
+  font-weight: bold;
+}
+
+.ping_clause {
+  font-weight: bold;
+  font-size: 15pt;
 }
