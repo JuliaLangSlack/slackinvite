@@ -103,6 +103,16 @@ function send_invite_mail() {
   })
 }
 
+function send_status_email(record) {
+  const email = record.email
+  Email.send_mail({
+    from: 'Jon Malmaud <malmaud@gmail.com>',
+    to: 'malmaud@gmail.com',
+    subject: 'A status update has been received',
+    html: `For user ${email}`
+  })
+}
+
 async function insert_request(connection, {email, first, last, github}) {
   const n_prev_users = await r.table('invites')('email').count(email).run(connection)
   if (n_prev_users == 0) {
@@ -163,11 +173,12 @@ const MutationType = new GraphQLObjectType({
           return {status: {code: -2, msg: "Not authorized"}}
         }
         const conn = context.connection
-        const status_change =  r.table('status_changes').insert({status: status, user_id: context.user.id, time: Date.now()}).run(conn)
+        const status_change =  r.table('status_changes').insert({status: status, request_id:id, user_id: context.user.id, time: Date.now()}).run(conn)
         const invite_add =  r.table('invites').get(id).update({status: status}).run(conn)
         await status_change
         await invite_add
         const record = await r.table('invites').get(id).run(conn)
+        send_status_email(record)
         const request = {id: record.id, email: record.email, status:get_status_code(record.status), name: {first: record.first, last:record.last}, github: record.github}
         return {status: {code: 0, msg: 'OK'}, request: request}
       }

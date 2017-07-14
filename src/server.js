@@ -63,7 +63,10 @@ function load_template(name, options) {
 
 async function init() {
   const secrets = load_secrets()
+  console.log('Initializing email')
   Email.init(secrets.email)
+  console.log('Done')
+  console.log('Initializing db')
   while (true) {
     try {
       connection = await r.connect({host: 'db', port: 28015})
@@ -73,10 +76,12 @@ async function init() {
       await timeout(1000)
     }
   }
+  console.log('Done')
   Auth.set_connection(connection)
 
+  console.log('Creating tables')
   await ensure_tables(['invites', 'sessions', 'status_changes'])
-
+  console.log('Done')
 
 
 
@@ -103,6 +108,8 @@ async function init() {
       req.user = users[0]
       req.user.is_admin = await Auth.review_authorized(req.user)
       next()
+    } else {
+      next()
     }
   })
   //
@@ -121,6 +128,7 @@ async function init() {
 
 
   app.get('/', async(req, res) => {
+    console.log('Responding')
     res.send(load_template('main', {page: 'invite_request', user: JSON.stringify(req.user)}))
   })
 
