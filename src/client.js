@@ -134,6 +134,10 @@ class InviteRequest extends React.Component {
   render() {
     const isValid = this.validate()
     const status = this.state.status;
+    let requestStatus = null;
+    if(status != 'neutral') {
+      requestStatus = <span>Request sent</span>
+    }
     let statusMsg = null;
     if(status == 'success') {
       statusMsg = <div className='alert alert-success'>Success! A request for an invite for  <strong>{this.state.email}</strong> has been received.</div>
@@ -173,6 +177,7 @@ class InviteRequest extends React.Component {
         </div>
 
         <div className='form-group'>
+          {statusMsg}
           <button type='submit' className='btn btn-default' disabled={!isValid} ref={btn=>{this.btn=btn;}}>Request invitation</button>
         </div>
 
