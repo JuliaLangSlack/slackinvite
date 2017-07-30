@@ -81,7 +81,7 @@ async function init() {
   Auth.set_connection(connection)
 
   console.log('Creating tables')
-  await ensure_tables(['invites', 'sessions', 'status_changes', 'admins'])
+  await ensure_tables(['invites', 'sessions', 'status_changes', 'admins', 'slack_tokens'])
   console.log('Done')
 
 
@@ -216,7 +216,7 @@ async function init() {
 
   app.use('/assets', express.static('assets'))
 
-  Slack.setup(app, secrets.slack)
+  Slack.setup(app, connection, secrets.slack)
 
   app.listen(4000)
 

@@ -12,6 +12,7 @@ import {
 import r from 'rethinkdb'
 import Auth from './auth'
 import Email from './email'
+import Slack from './slack'
 
 
 const StatusType = new  GraphQLObjectType({
@@ -116,8 +117,8 @@ function send_status_email(record) {
 async function insert_request(connection, {email, first, last, github}) {
   const n_prev_users = await r.table('invites')('email').count(email).run(connection)
   if (n_prev_users == 0) {
-    const res = await r.table('invites').insert({email, first, last, github, status: 'PENDING', time: Date.now()}).run(connection)
-    send_invite_mail()
+    const res = await r.table('invites').insert({email, first, last, github, status: 'ACCEPTED', time: Date.now()}).run(connection)
+    //send_invite_mail()
 
     const status = {
       code: 0,
@@ -158,7 +159,9 @@ const MutationType = new GraphQLObjectType({
         github: {type:GraphQLString}
       },
       resolve(root, {email, first, last, github}, context) {
-        return insert_request(context.connection, {email, first, last, github})
+        Slack.send_invite({email: email, name: {first: first, last: last}})
+        const res = insert_request(context.connection, {email, first, last, github})
+        return res
       }
     },
 
