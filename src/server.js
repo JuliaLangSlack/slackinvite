@@ -13,6 +13,7 @@ import pug from 'pug'
 import schema from './schema'
 import Auth from './auth'
 import Email from './email'
+import Slack from './slack'
 
 // async function load_schema() {
 //   let schema_text = fs.readFileSync('./schema.graphql', 'utf8')
@@ -214,6 +215,8 @@ async function init() {
   })
 
   app.use('/assets', express.static('assets'))
+
+  Slack.setup(app, secrets.slack)
 
   app.listen(4000)
 
