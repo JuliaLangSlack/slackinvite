@@ -1,18 +1,6 @@
-enum AuthLevel {
-  USER
-  ADMIN
-}
-
 type Name {
   first: String
   last: String
-}
-
-type User {
-  id: ID
-  email: String
-  name: Name
-  level: AuthLevel
 }
 
 enum InviteStatus {
@@ -36,7 +24,7 @@ type InviteRequest {
 }
 
 type Query {
-  getRequests(): [InviteRequest]
+  getRequests: [InviteRequest]
 }
 
 type RequestStatus {

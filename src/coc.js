@@ -3,7 +3,9 @@ import React from 'react'
 class CoC extends React.Component {
   render() {
     return <span className='coc'>
-      I agree to adhere to the <a href="https://julialang.org/community/standards/">Julia Code of Conduct</a> in all public channels:
+      I agree to adhere to the
+      <a href="https://julialang.org/community/standards/">Julia Code of Conduct</a>
+      in all public channels:
       <blockquote>
         <p>
           <strong>Be respectful and inclusive.</strong>
