@@ -57,13 +57,13 @@ function setup(app, _connection, _secrets) {
     console.log(`Got request with body ${JSON.stringify(req.body)}`)
     let response = {}
     const text = req.body.text
-    const issue_number = text.match(/(\d+)/)
-    if(issue_number === null) {
+    const matches = text.match(/(.*\/.* )?(\d+)/)
+    if(matches === null) {
       response.response_type = 'ephemeral'
       response.text = `Invalid issue number: ${text}`
     } else {
       response.response_type = 'in_channel'
-      response.text = `https://github.com/JuliaLang/julia/issues/${issue_number[1]}`
+      response.text = `https://github.com/${matches[1] === null ? "JuliaLang/julia" : matches[1]}/issues/${matches[2]}`
     }
     res.type('json')
     res.send(response)
