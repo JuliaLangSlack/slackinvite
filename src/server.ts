@@ -1,34 +1,30 @@
-import express from 'express'
-import graphqlHTTP from 'express-graphql'
+import * as express from 'express'
+import * as graphqlHTTP from 'express-graphql'
 import {buildSchema, graphql} from 'graphql'
-import fs from 'fs'
-import compression from 'compression'
-import r from 'rethinkdb'
-import _ from 'lodash'
-import bodyParser from 'body-parser'
-import cookieParser from 'cookie-parser'
-import request from 'request'
-import sjcl from 'sjcl'
-import pug from 'pug'
+import * as fs from 'fs'
+import * as compression from 'compression'
+import * as r from 'rethinkdb'
+import * as _ from 'lodash'
+import * as bodyParser from 'body-parser'
+import * as cookieParser from 'cookie-parser'
+import * as request from 'request'
+import * as sjcl from 'sjcl'
+import * as pug from 'pug'
 import schema from './schema'
-import Auth from './auth'
-import Email from './email'
-import Slack from './slack'
+import * as Auth from './auth'
+import * as Email from './email'
+import * as Slack from './slack'
+import {User} from './types'
 
-// async function load_schema() {
-//   let schema_text = fs.readFileSync('./schema.graphql', 'utf8')
-//   let schema = await buildSchema(schema_text);
-//   return schema
-// }
+let connection:r.Connection|null = null
+let db_name = 'test'
 
-let connection = null
-
-async function ensure_tables(names) {
-  const tables = await r.tableList().run(connection)
+async function ensure_tables(names:string[]) {
+  const tables = await r.db(db_name).tableList().run(connection!)
   let promises = []
   for (let name of names) {
     if (!_.includes(tables, name)) {
-      promises.push(r.tableCreate(name).run(connection))
+      promises.push(r.db(db_name).tableCreate(name).run(connection!))
     }
   }
   for (let promise of promises) {
@@ -36,7 +32,7 @@ async function ensure_tables(names) {
   }
 }
 
-function timeout(ms) {
+function timeout(ms:number) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
@@ -52,7 +48,12 @@ function load_secrets() {
   return decoded
 }
 
-function load_template(name, options) {
+interface TemplateOptions {
+  user?: any
+  page?: string
+}
+
+function load_template(name:string, options:TemplateOptions) {
   if(options==null) {
     options = {}
   }
@@ -60,6 +61,16 @@ function load_template(name, options) {
     options.user = '{}'
   }
   return pug.renderFile(`./templates/${name}.jade`, options)
+}
+
+declare global {
+    namespace Express {
+        export interface Request {
+          user:User
+          connection: r.Connection
+          session: string
+        }
+    }
 }
 
 async function init() {
@@ -90,8 +101,9 @@ async function init() {
   app.use(compression())
   app.use(cookieParser())
 
+
   app.use((req, res, next) => {
-    req.connection = connection
+    req.connection = <any>connection
     next()
   })
 
@@ -102,9 +114,9 @@ async function init() {
       session = gen_session_key()
       res.cookie('session', session)
     }
-    req.session = session
-    let user_cursor = await r.table('sessions').filter({session}).run(connection)
-    let users = await user_cursor.toArray()
+    (<any>req).session = session
+    let user_cursor = await r.table('sessions').filter({session}).run(connection!)
+    let users:User[] = await user_cursor.toArray()
     if (users.length > 0) {
       req.user = users[0]
       req.user.is_admin = await Auth.review_authorized(req.user)
@@ -121,16 +133,18 @@ async function init() {
   //   next()
   // })
 
-  app.use('/graphql', graphqlHTTP((request, response, params)=>{
-    return {
-      schema: schema,
-      graphiql: true}
-  }))
+  // app.use('/graphql', graphqlHTTP((request, response, params)=>{
+  //   return {
+  //     schema: schema,
+  //     graphiql: true}
+  // }))
+
+  app.use('/graphql', graphqlHTTP({schema: schema, graphiql: true}))
 
 
   app.get('/', async(req, res) => {
     console.log('Responding')
-    res.send(load_template('main', {page: 'invite_request', user: JSON.stringify(req.user)}))
+    res.send(load_template('main', {page: 'invite_request', user: JSON.stringify((<any>req).user)}))
   })
 
   app.get('/login', (req, res) => {
@@ -198,10 +212,14 @@ async function init() {
             github_token: token
           }
           if (user == null) {
-            await r.table('sessions').insert(record).run(connection)
+            await r.table('sessions').insert(record).run(connection!)
             res.redirect('/')
           } else {
-            await r.table('sessions').get(user.id).update(record).run(connection)
+            if(user.id == null) {
+              throw("User id field is missing")
+            } else {
+              await r.table('sessions').get(user.id).update(record).run(connection!)
+            }
             res.redirect('/')
           }
         })

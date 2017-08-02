@@ -1,0 +1,17 @@
+{
+  "include": [
+    "src/*"
+  ],
+  "compilerOptions": {
+    "sourceMap": true,
+    "pretty": true,
+    "watch": true,
+    "outDir": "lib",
+    "lib": [
+      "ES2017"
+    ],
+    "jsx": "React",
+    "strict": true
+  },
+  "compileOnSave": true
+}

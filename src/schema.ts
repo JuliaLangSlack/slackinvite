@@ -9,10 +9,11 @@ import {
   GraphQLEnumType,
   GraphQLList
 } from 'graphql'
-import r from 'rethinkdb'
-import Auth from './auth'
-import Email from './email'
-import Slack from './slack'
+import * as r from 'rethinkdb'
+import * as Auth from './auth'
+import * as Email from './email'
+import * as Slack from './slack'
+import {User} from './types'
 
 
 const StatusType = new  GraphQLObjectType({
@@ -52,12 +53,19 @@ const InviteRequestType = new GraphQLObjectType({
   }
 })
 
-function get_status_code(db_status) {
-  return {ACCEPTED: 0, DENIED: 1, PENDING: 2}[db_status]
+enum StatusCode {
+  ACCEPTED,
+  DENIED,
+  PENDING
 }
 
-function get_status_name(code) {
-  return ['ACCEPTED', 'DENIED', 'PENDING'][code]
+interface Record {
+  email?: string
+  first?: string
+  last?: string
+  github?: string
+  status?: string
+  id?: string
 }
 
 const QueryType = new GraphQLObjectType({
@@ -68,14 +76,14 @@ const QueryType = new GraphQLObjectType({
       async resolve(root, args, context) {
         if(await Auth.review_authorized(context.user)) {
           const cursor = await r.table('invites').run(context.connection)
-          const requests = await cursor.toArray()
+          const requests:Record[] = await cursor.toArray()
           let res = []
           for(let request of requests) {
             res.push({id: request.id,
                       email: request.email,
                       name: {first: request.first, last: request.last},
                       github: request.github,
-                      status: get_status_code(request.status)
+                      status: StatusCode[request.status as (keyof typeof StatusCode)]
                     })
           }
           return res
@@ -104,7 +112,9 @@ function send_invite_mail() {
   })
 }
 
-function send_status_email(record) {
+
+
+function send_status_email(record:Record) {
   const email = record.email
   Email.send_mail({
     from: 'Jon Malmaud <malmaud@gmail.com>',
@@ -114,8 +124,8 @@ function send_status_email(record) {
   })
 }
 
-async function insert_request(connection, {email, first, last, github}) {
-  const n_prev_users = await r.table('invites')('email').count(email).run(connection)
+async function insert_request(connection:r.Connection, {email, first, last, github}:Record) {
+  const n_prev_users:number = await (r.table('invites') as any)('email').count(email).run(connection)
   if (n_prev_users == 0) {
     const res = await r.table('invites').insert({email, first, last, github, status: 'ACCEPTED', time: Date.now()}).run(connection)
     //send_invite_mail()
@@ -180,9 +190,9 @@ const MutationType = new GraphQLObjectType({
         const invite_add =  r.table('invites').get(id).update({status: status}).run(conn)
         await status_change
         await invite_add
-        const record = await r.table('invites').get(id).run(conn)
+        const record:Record = (await r.table('invites').get(id).run(conn)) as any
         send_status_email(record)
-        const request = {id: record.id, email: record.email, status:get_status_code(record.status), name: {first: record.first, last:record.last}, github: record.github}
+        const request = {id: record.id, email: record.email, status: StatusCode[record.status as keyof typeof StatusCode], name: {first: record.first, last:record.last}, github: record.github}
         return {status: {code: 0, msg: 'OK'}, request: request}
       }
     }
