@@ -1,10 +1,11 @@
 import 'babel-polyfill'
-import ReactDOM from 'react-dom'
-import React from 'react'
-import {ApolloClient, ApolloProvider, gql, graphql, createNetworkInterface} from 'react-apollo'
-import emailValidator from 'email-validator'
-import CoC from './coc.js'
-import ReviewInvites from './review_invites'
+import * as ReactDOM from 'react-dom'
+import * as React from 'react'
+import {ApolloClient, ApolloProvider, gql, graphql, createNetworkInterface, ChildProps} from 'react-apollo'
+import * as emailValidator from 'email-validator'
+import CoC from './coc'
+import {ReviewInvites, fragments as InviteFragments} from './review_invites'
+import {User} from './types'
 
 const networkInterface = createNetworkInterface({
   uri: '/graphql',
@@ -14,23 +15,26 @@ const networkInterface = createNetworkInterface({
 });
 const client = new ApolloClient({networkInterface})
 
-class Main extends React.Component {
-  constructor() {
-    super()
-  }
+interface MainProps {
+  page: string
+  user: User
+}
+
+class Main extends React.Component<MainProps, {}> {
+  static defaultProps:Partial<MainProps> = {page: 'invite_request'}
 
   render() {
     const page = this.props.page
     let inner_content = null
 
     if(page == 'invite_request') {
-      inner_content = <InviteRequest user={this.props.user}/>
+      inner_content = <InviteRequestGQL user={this.props.user}/>
     } else if(page == 'review') {
       inner_content = <ReviewInvites/>
     }
     return <div>
       <div className='container main'>
-        <Footer page={this.props.page} user={this.props.user}/>
+        <Footer page={page} user={this.props.user}/>
         <div className='logo'>
           <a href="http://julialang.org"><img src="/assets/Julia_prog_language.svg"/></a>
         </div>
@@ -42,9 +46,7 @@ class Main extends React.Component {
   }
 }
 
-Main.defaultProps = {page: 'invite_request'}
-
-class Footer extends React.Component {
+class Footer extends React.Component<{user:User, page:string}, {}> {
   render() {
     let login = null
     let review = null
@@ -70,26 +72,37 @@ class Footer extends React.Component {
   }
 }
 
+interface RequestState {
+  email?: string
+  first?: string
+  last?: string
+  github?: string
+  status?: string
+  coc?: boolean
+  msg?: string
+}
 
+interface InviteRequestProps {
+  user: User
+}
 
-class InviteRequest extends React.Component {
+class InviteRequest extends React.Component<ChildProps<InviteRequestProps, any>, RequestState> {
   constructor() {
     super()
-    this.state = {email: '', first: '', last: '', github: '',
+    this.state= {email: '', first: '', last: '', github: '',
                   status: 'neutral', 'coc': false, msg: ''}
     this.onChange = this.onChange.bind(this)
     this.onSubmit = this.onSubmit.bind(this)
   }
 
   componentDidMount() {
-    console.log("mounted")
     const user = this.props.user
     if(user) {
-      let init_state = {}
+      let init_state:RequestState = {}
       if(user.email) init_state.email = user.email
       if(user.login) init_state.github = user.login
       if(user.name) {
-        const split = user.name.split(' ')
+        const split = (user.name as string).split(' ')
         if(split.length > 0) {
           init_state.first = split[0]
         }
@@ -101,15 +114,15 @@ class InviteRequest extends React.Component {
     }
   }
 
-  onChange(event) {
+  onChange(event:React.ChangeEvent<{}>) {
     const target = event.target
     const value = target.type=='checkbox' ? target.checked : target.value
     this.setState({[target.name]: value})
   }
 
-  onSubmit(event) {
+  onSubmit(event:React.FormEvent<{}>) {
     event.preventDefault()
-    this.props.mutate({
+    this.props.mutate!({
       variables: {email: this.state.email,
                   first: this.state.first,
                   last: this.state.last,
@@ -121,14 +134,18 @@ class InviteRequest extends React.Component {
       } else {
         this.setState({status: 'fail', msg: status.msg})
       }
-    }).catch(error=>{
+    }).catch((error:any)=>{
       console.log('error: ', error)
     })
   }
 
   validate() {
-    const validEmail = emailValidator.validate(this.state.email)
-    return validEmail && this.state.first.length > 0 && this.state.last.length > 0 && this.state.coc
+    const validEmail = this.state.email ? emailValidator.validate(this.state.email) : false
+    if(this.state.first && this.state.last) {
+      return validEmail && this.state.first.length > 0 && this.state.last.length > 0 && this.state.coc
+    } else {
+      return false
+    }
   }
 
   render() {
@@ -178,7 +195,7 @@ class InviteRequest extends React.Component {
 
         <div className='form-group'>
           {statusMsg}
-          <button type='submit' className='btn btn-default' disabled={!isValid} ref={btn=>{this.btn=btn;}}>Request invitation</button>
+          <button type='submit' className='btn btn-default' disabled={!isValid}>Request invitation</button>
         </div>
 
       </form>
@@ -199,9 +216,9 @@ const requestInvite = gql`
     }
   }`
 
-InviteRequest = graphql(requestInvite)(InviteRequest)
+const InviteRequestGQL = graphql<any, InviteRequestProps>(requestInvite)(InviteRequest)
 
-class Root extends React.Component {
+class Root extends React.Component<{page: string, user: User}, {}> {
   render() {
     return <div>
       <ApolloProvider client={client}>
@@ -211,9 +228,13 @@ class Root extends React.Component {
   }
 }
 
+declare const page:string
+declare const user:User
+declare const document:any
+declare const window:any
+
 function mount_react() {
   ReactDOM.render(<Root page={page} user={user}/>, document.getElementById('root'))
-  console.log(`Ready for page ${page}`)
 }
 
 window.onload = mount_react;

@@ -75,7 +75,6 @@ function setup(app:express.Application, _connection:r.Connection, _secrets:Secre
   })
 
   app.post(`${slack_domain}/gh`, (req, res)=>{
-    console.log(`Got request with body ${JSON.stringify(req.body)}`)
     let response:SlashResponse = {}
     const text = req.body.text
     const matches = text.match(/(.*\/.* )?(\d+)/)
@@ -122,7 +121,6 @@ function setup(app:express.Application, _connection:r.Connection, _secrets:Secre
         res.redirect('/')
       } else {
         r.table('slack_tokens').insert({token: body.access_token, user_id: body.user_id, scope: body.scope, team_name: body.team_name, team_id: body.team_id, create_date: r.now()}).run(connection!)
-        console.log('Slack login successful')
         res.redirect('/')
       }
     })

@@ -1,4 +1,4 @@
-import React from 'react'
+import * as React from 'react'
 
 class CoC extends React.Component {
   render() {

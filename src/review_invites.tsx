@@ -1,34 +1,29 @@
-import React from 'react'
-import {gql, graphql} from 'react-apollo'
-import _ from 'lodash'
+import * as React from 'react'
+import {gql, graphql, MutationFunc, ChildProps} from 'react-apollo'
+import * as _ from 'lodash'
+import {InviteRequest} from './types'
 
-class ReviewInvite extends React.Component {
-  constructor() {
-    super()
-  }
+interface Props {
+  request: InviteRequest
+}
 
-  setStatus(status) {
-    console.log(this.props.request.id, ' ', status)
-    this.props.mutate({
+class ReviewInvite extends React.Component<ChildProps<Props, undefined>, {}> {
+  setStatus(status: string) {
+    this.props.mutate!({
       variables: {id: this.props.request.id,
-                  status: status},
-      update(store, results) {
-        // const request = results.data.changeRequestStatus.request
-        // request.status = status
-        // store.writeFragment({
-        //   id: `InviteRequest:${request.id}`,
-        //   fragment: ReviewInvite.fragments.request,
-        //   data: request})
-        // console.log(record)
-      }
+                  status: status}
     })
   }
 
   render() {
     const request = this.props.request
+    let name = "<Unknown>"
+    if(request.name) {
+      name = `${request.name.last}, ${request.name.first}`
+    }
     return <div className='row'>
       <div className='col-xs-2'>
-        {`${request.name.last}, ${request.name.first}`}
+        {name}
       </div>
       <div className='col-xs-2'>
         <a href={`https://github.com/${request.github}`}>{request.github}</a>
@@ -49,7 +44,7 @@ class ReviewInvite extends React.Component {
   }
 }
 
-ReviewInvite.fragments = {
+const fragments = {
   request:  gql`
     fragment requestParts on InviteRequest {
       id
@@ -64,9 +59,12 @@ ReviewInvite.fragments = {
   `
 }
 
+interface InviteGQLResponse {
+  getRequests: InviteRequest[]
+}
 
 const modifyInvite = gql`
-  ${ReviewInvite.fragments.request}
+  ${fragments.request}
 
   mutation modify($id: ID, $status: String) {
 
@@ -82,17 +80,23 @@ const modifyInvite = gql`
   }
 `
 
-ReviewInvite = graphql(modifyInvite)(ReviewInvite)
+const ReviewInviteGQL = graphql<any, Props>(modifyInvite)(ReviewInvite)
 
-class ReviewInvites extends React.Component {
+
+class ReviewInvites extends React.Component<ChildProps<{}, InviteGQLResponse>, {}> {
   render() {
+    if(!this.props.data) return <div/>
     if (this.props.data.getRequests) {
-      const requests = this.props.data.getRequests
-      const sorted = _.sortBy(requests, [req=>{
-        return {'PENDING': 0, 'DENIED': 1, 'APPROVED': 2}[req.status]
-      }, req=>{return req.github}])
+      const requests:InviteRequest[] = this.props.data.getRequests
+      const sorted = _.sortBy(requests, [(req:InviteRequest)=>{
+        if(req.status) {
+          return ({'PENDING': 0, 'DENIED': 1, 'APPROVED': 2} as {[status:string]:number})[req.status]
+        } else {
+          return 3
+        }
+      }, (req:InviteRequest)=>{return req.github}])
       const requests_dom = sorted.map(request=>{
-        return <div key={request.id}><ReviewInvite request={request}/></div>
+        return <div key={request.id}><ReviewInviteGQL request={request}/></div>
       })
       return <div>
         <div className='row'>
@@ -112,14 +116,15 @@ class ReviewInvites extends React.Component {
 }
 
 const getInvites = gql`
-  ${ReviewInvite.fragments.request}
+  ${fragments.request}
 
   query {
     getRequests {
       ...requestParts
     }
-  }`
+  }
+`
 
-ReviewInvites = graphql(getInvites)(ReviewInvites)
+const ReviewInvitesGQL = graphql<InviteGQLResponse, any>(getInvites)(ReviewInvites)
 
-export default ReviewInvites
+export {ReviewInvitesGQL as ReviewInvites, fragments}

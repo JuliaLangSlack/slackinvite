@@ -13,7 +13,7 @@ import * as r from 'rethinkdb'
 import * as Auth from './auth'
 import * as Email from './email'
 import * as Slack from './slack'
-import {User} from './types'
+import {User, StatusCode} from './types'
 
 
 const StatusType = new  GraphQLObjectType({
@@ -52,12 +52,6 @@ const InviteRequestType = new GraphQLObjectType({
     github: {type:GraphQLString}
   }
 })
-
-enum StatusCode {
-  ACCEPTED,
-  DENIED,
-  PENDING
-}
 
 interface Record {
   email?: string
@@ -127,7 +121,7 @@ function send_status_email(record:Record) {
 async function insert_request(connection:r.Connection, {email, first, last, github}:Record) {
   const n_prev_users:number = await (r.table('invites') as any)('email').count(email).run(connection)
   if (n_prev_users == 0) {
-    const res = await r.table('invites').insert({email, first, last, github, status: 'ACCEPTED', time: Date.now()}).run(connection)
+    const res = await r.table('invites').insert({email, first, last, github, status: 'ACCEPTED', time: r.now()}).run(connection)
     //send_invite_mail()
 
     const status = {
@@ -186,7 +180,7 @@ const MutationType = new GraphQLObjectType({
           return {status: {code: -2, msg: "Not authorized"}}
         }
         const conn = context.connection
-        const status_change =  r.table('status_changes').insert({status: status, request_id:id, user_id: context.user.id, time: Date.now()}).run(conn)
+        const status_change =  r.table('status_changes').insert({status: status, request_id:id, user_id: context.user.id, time: r.now()}).run(conn)
         const invite_add =  r.table('invites').get(id).update({status: status}).run(conn)
         await status_change
         await invite_add
@@ -206,4 +200,4 @@ const schema = new GraphQLSchema({
 })
 
 
-export default schema
+export {schema}
