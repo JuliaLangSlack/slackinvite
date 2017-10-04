@@ -1,7 +1,7 @@
 import * as nodemailer from 'nodemailer'
-import {User} from './types'
+import { User } from './types'
 
-let transporter:nodemailer.Transporter|null = null
+let transporter: nodemailer.Transporter | null = null
 
 interface Secrets {
   server: string
@@ -21,10 +21,10 @@ function init(secrets: Secrets) {
   })
 }
 
-async function send_mail(options:nodemailer.SendMailOptions) {
+async function send_mail(options: nodemailer.SendMailOptions) {
   const data = await transporter!.sendMail(options)
   return data
 }
 
 
-export {init, send_mail}
+export { init, send_mail }

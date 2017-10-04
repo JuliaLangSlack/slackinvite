@@ -1,6 +1,6 @@
 import * as express from 'express'
 import * as graphqlHTTP from 'express-graphql'
-import {buildSchema, graphql} from 'graphql'
+import { buildSchema, graphql } from 'graphql'
 import * as fs from 'fs'
 import * as compression from 'compression'
 import * as r from 'rethinkdb'
@@ -10,16 +10,16 @@ import * as cookieParser from 'cookie-parser'
 import * as request from 'request'
 import * as sjcl from 'sjcl'
 import * as pug from 'pug'
-import {schema} from './schema'
+import { schema } from './schema'
 import * as Auth from './auth'
 import * as Email from './email'
 import * as Slack from './slack'
-import {User} from './types'
+import { User } from './types'
 
-let connection:r.Connection|null = null
+let connection: r.Connection | null = null
 let db_name = 'test'
 
-async function ensure_tables(names:string[]) {
+async function ensure_tables(names: string[]) {
   const tables = await r.db(db_name).tableList().run(connection!)
   let promises = []
   for (let name of names) {
@@ -32,7 +32,7 @@ async function ensure_tables(names:string[]) {
   }
 }
 
-function timeout(ms:number) {
+function timeout(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
@@ -53,24 +53,24 @@ interface TemplateOptions {
   page?: string
 }
 
-function load_template(name:string, options:TemplateOptions) {
-  if(options==null) {
+function load_template(name: string, options: TemplateOptions) {
+  if (options == null) {
     options = {}
   }
-  if(options.user == null) {
+  if (options.user == null) {
     options.user = '{}'
   }
   return pug.renderFile(`./templates/${name}.jade`, options)
 }
 
 declare global {
-    namespace Express {
-        export interface Request {
-          user:User
-          connection: r.Connection
-          session: string
-        }
+  namespace Express {
+    export interface Request {
+      user: User
+      connection: r.Connection
+      session: string
     }
+  }
 }
 
 async function init() {
@@ -81,7 +81,7 @@ async function init() {
   console.log('Initializing db')
   while (true) {
     try {
-      connection = await r.connect({host: 'db', port: 28015})
+      connection = await r.connect({ host: 'db', port: 28015 })
       break
     } catch (err) {
       console.log(`Error connecting to db: ${err}`)
@@ -107,7 +107,7 @@ async function init() {
     next()
   })
 
-  app.use(async(req, res, next) => {
+  app.use(async (req, res, next) => {
     let session = req.cookies['session']
 
     if (session == null || session == '') {
@@ -115,8 +115,8 @@ async function init() {
       res.cookie('session', session)
     }
     (<any>req).session = session
-    let user_cursor = await r.table('sessions').filter({session}).run(connection!)
-    let users:User[] = await user_cursor.toArray()
+    let user_cursor = await r.table('sessions').filter({ session }).run(connection!)
+    let users: User[] = await user_cursor.toArray()
     if (users.length > 0) {
       req.user = users[0]
       req.user.is_admin = await Auth.review_authorized(req.user)
@@ -139,12 +139,12 @@ async function init() {
   //     graphiql: true}
   // }))
 
-  app.use('/graphql', graphqlHTTP({schema: schema, graphiql: true}))
+  app.use('/graphql', graphqlHTTP({ schema: schema, graphiql: true }))
 
 
-  app.get('/', async(req, res) => {
+  app.get('/', async (req, res) => {
     console.log('Responding')
-    res.send(load_template('main', {page: 'invite_request', user: JSON.stringify((<any>req).user)}))
+    res.send(load_template('main', { page: 'invite_request', user: JSON.stringify((<any>req).user) }))
   })
 
   app.get('/login', (req, res) => {
@@ -153,15 +153,15 @@ async function init() {
     res.redirect(url)
   })
 
-  app.get('/review', async (req, res)=>{
+  app.get('/review', async (req, res) => {
     if (await Auth.review_authorized(req.user)) {
-      res.send(load_template('main', {page: 'review', user: JSON.stringify(req.user)}))
+      res.send(load_template('main', { page: 'review', user: JSON.stringify(req.user) }))
     } else {
       res.redirect('/')
     }
   })
 
-  app.get('/logout', (req, res)=>{
+  app.get('/logout', (req, res) => {
     res.cookie('session', '')
     res.redirect('/')
   })
@@ -179,7 +179,7 @@ async function init() {
       headers: {
         Accept: 'application/json'
       }
-    }, async(error, response, body) => {
+    }, async (error, response, body) => {
       try {
         const data = JSON.parse(body)
         const token = data['access_token']
@@ -215,8 +215,8 @@ async function init() {
             await r.table('sessions').insert(record).run(connection!)
             res.redirect('/')
           } else {
-            if(user.id == null) {
-              throw("User id field is missing")
+            if (user.id == null) {
+              throw ("User id field is missing")
             } else {
               await r.table('sessions').get(user.id).update(record).run(connection!)
             }

@@ -1,7 +1,7 @@
 import * as React from 'react'
-import {gql, graphql, MutationFunc, ChildProps} from 'react-apollo'
+import { gql, graphql, MutationFunc, ChildProps } from 'react-apollo'
 import * as _ from 'lodash'
-import {InviteRequest} from './types'
+import { InviteRequest } from './types'
 
 interface Props {
   request: InviteRequest
@@ -10,15 +10,17 @@ interface Props {
 class ReviewInvite extends React.Component<ChildProps<Props, undefined>, {}> {
   setStatus(status: string) {
     this.props.mutate!({
-      variables: {id: this.props.request.id,
-                  status: status}
+      variables: {
+        id: this.props.request.id,
+        status: status
+      }
     })
   }
 
   render() {
     const request = this.props.request
     let name = "<Unknown>"
-    if(request.name) {
+    if (request.name) {
       name = `${request.name.last}, ${request.name.first}`
     }
     return <div className='row'>
@@ -35,17 +37,17 @@ class ReviewInvite extends React.Component<ChildProps<Props, undefined>, {}> {
         {request.status}
       </div>
       <div className='col-xs-2'>
-        <button className='btn btn-success' onClick={()=>this.setStatus('ACCEPTED')}>Approve</button>
+        <button className='btn btn-success' onClick={() => this.setStatus('ACCEPTED')}>Approve</button>
       </div>
       <div className='col-xs-2'>
-        <button className='btn btn-danger' onClick={()=>this.setStatus('DENIED')}>Deny</button>
+        <button className='btn btn-danger' onClick={() => this.setStatus('DENIED')}>Deny</button>
       </div>
     </div>
   }
 }
 
 const fragments = {
-  request:  gql`
+  request: gql`
     fragment requestParts on InviteRequest {
       id
       name {
@@ -85,18 +87,18 @@ const ReviewInviteGQL = graphql<any, Props>(modifyInvite)(ReviewInvite)
 
 class ReviewInvites extends React.Component<ChildProps<{}, InviteGQLResponse>, {}> {
   render() {
-    if(!this.props.data) return <div/>
+    if (!this.props.data) return <div />
     if (this.props.data.getRequests) {
-      const requests:InviteRequest[] = this.props.data.getRequests
-      const sorted = _.sortBy(requests, [(req:InviteRequest)=>{
-        if(req.status) {
-          return ({'PENDING': 0, 'DENIED': 1, 'APPROVED': 2} as {[status:string]:number})[req.status]
+      const requests: InviteRequest[] = this.props.data.getRequests
+      const sorted = _.sortBy(requests, [(req: InviteRequest) => {
+        if (req.status) {
+          return ({ 'PENDING': 0, 'DENIED': 1, 'APPROVED': 2 } as { [status: string]: number })[req.status]
         } else {
           return 3
         }
-      }, (req:InviteRequest)=>{return req.github}])
-      const requests_dom = sorted.map(request=>{
-        return <div key={request.id}><ReviewInviteGQL request={request}/></div>
+      }, (req: InviteRequest) => { return req.github }])
+      const requests_dom = sorted.map(request => {
+        return <div key={request.id}><ReviewInviteGQL request={request} /></div>
       })
       return <div>
         <div className='row'>
@@ -127,4 +129,4 @@ const getInvites = gql`
 
 const ReviewInvitesGQL = graphql<InviteGQLResponse, any>(getInvites)(ReviewInvites)
 
-export {ReviewInvitesGQL as ReviewInvites, fragments}
+export { ReviewInvitesGQL as ReviewInvites, fragments }

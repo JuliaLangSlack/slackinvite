@@ -1,13 +1,13 @@
 declare namespace Hi {
   export interface X {
-    a:any
+    a: any
   }
 }
 
 declare namespace Hi {
   export interface X {
-    b:any
+    b: any
   }
 }
 
-let b:Hi.X = {a:1, b:2}
+let b: Hi.X = { a: 1, b: 2 }

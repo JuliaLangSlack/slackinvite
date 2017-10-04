@@ -1,11 +1,11 @@
 import 'babel-polyfill'
 import * as ReactDOM from 'react-dom'
 import * as React from 'react'
-import {ApolloClient, ApolloProvider, gql, graphql, createNetworkInterface, ChildProps} from 'react-apollo'
+import { ApolloClient, ApolloProvider, gql, graphql, createNetworkInterface, ChildProps } from 'react-apollo'
 import * as emailValidator from 'email-validator'
 import CoC from './coc'
-import {ReviewInvites, fragments as InviteFragments} from './review_invites'
-import {User} from './types'
+import { ReviewInvites, fragments as InviteFragments } from './review_invites'
+import { User } from './types'
 
 const networkInterface = createNetworkInterface({
   uri: '/graphql',
@@ -13,7 +13,7 @@ const networkInterface = createNetworkInterface({
     credentials: 'same-origin',
   },
 });
-const client = new ApolloClient({networkInterface})
+const client = new ApolloClient({ networkInterface })
 
 interface MainProps {
   page: string
@@ -21,22 +21,22 @@ interface MainProps {
 }
 
 class Main extends React.Component<MainProps, {}> {
-  static defaultProps:Partial<MainProps> = {page: 'invite_request'}
+  static defaultProps: Partial<MainProps> = { page: 'invite_request' }
 
   render() {
     const page = this.props.page
     let inner_content = null
 
-    if(page == 'invite_request') {
-      inner_content = <InviteRequestGQL user={this.props.user}/>
-    } else if(page == 'review') {
-      inner_content = <ReviewInvites/>
+    if (page == 'invite_request') {
+      inner_content = <InviteRequestGQL user={this.props.user} />
+    } else if (page == 'review') {
+      inner_content = <ReviewInvites />
     }
     return <div>
       <div className='container main'>
-        <Footer page={page} user={this.props.user}/>
+        <Footer page={page} user={this.props.user} />
         <div className='logo'>
-          <a href="http://julialang.org"><img src="/assets/Julia_prog_language.svg"/></a>
+          <a href="http://julialang.org"><img src="/assets/Julia_prog_language.svg" /></a>
         </div>
 
         {inner_content}
@@ -46,7 +46,7 @@ class Main extends React.Component<MainProps, {}> {
   }
 }
 
-class Footer extends React.Component<{user:User, page:string}, {}> {
+class Footer extends React.Component<{ user: User, page: string }, {}> {
   render() {
     let login = null
     let review = null
@@ -55,9 +55,9 @@ class Footer extends React.Component<{user:User, page:string}, {}> {
     if (user && user.login) {
       login = <a>Welcome <span className='header'>{user.login}</span></a>
       const page = this.props.page
-      if(page=='invite_request' && user.is_admin) {
+      if (page == 'invite_request' && user.is_admin) {
         review = <a href='/review'>Review requests</a>
-      } else if(page=='review') {
+      } else if (page == 'review') {
         review = <a href='/'>Request an invite</a>
       }
       logout = <a href='/logout'>Logout</a>
@@ -89,24 +89,26 @@ interface InviteRequestProps {
 class InviteRequest extends React.Component<ChildProps<InviteRequestProps, any>, RequestState> {
   constructor() {
     super()
-    this.state= {email: '', first: '', last: '', github: '',
-                  status: 'neutral', 'coc': false, msg: ''}
+    this.state = {
+      email: '', first: '', last: '', github: '',
+      status: 'neutral', 'coc': false, msg: ''
+    }
     this.onChange = this.onChange.bind(this)
     this.onSubmit = this.onSubmit.bind(this)
   }
 
   componentDidMount() {
     const user = this.props.user
-    if(user) {
-      let init_state:RequestState = {}
-      if(user.email) init_state.email = user.email
-      if(user.login) init_state.github = user.login
-      if(user.name) {
+    if (user) {
+      let init_state: RequestState = {}
+      if (user.email) init_state.email = user.email
+      if (user.login) init_state.github = user.login
+      if (user.name) {
         const split = (user.name as string).split(' ')
-        if(split.length > 0) {
+        if (split.length > 0) {
           init_state.first = split[0]
         }
-        if(split.length > 1) {
+        if (split.length > 1) {
           init_state.last = split[1]
         }
       }
@@ -114,34 +116,36 @@ class InviteRequest extends React.Component<ChildProps<InviteRequestProps, any>,
     }
   }
 
-  onChange(event:React.ChangeEvent<{}>) {
+  onChange(event: React.ChangeEvent<{}>) {
     const target = event.target
-    const value = target.type=='checkbox' ? target.checked : target.value
-    this.setState({[target.name]: value})
+    const value = target.type == 'checkbox' ? target.checked : target.value
+    this.setState({ [target.name]: value })
   }
 
-  onSubmit(event:React.FormEvent<{}>) {
+  onSubmit(event: React.FormEvent<{}>) {
     event.preventDefault()
     this.props.mutate!({
-      variables: {email: this.state.email,
-                  first: this.state.first,
-                  last: this.state.last,
-                  github: this.state.github}
-    }).then(({data})=>{
-      const status = data.addRequest.status
-      if(status.code >= 0) {
-        this.setState({status: 'success'})
-      } else {
-        this.setState({status: 'fail', msg: status.msg})
+      variables: {
+        email: this.state.email,
+        first: this.state.first,
+        last: this.state.last,
+        github: this.state.github
       }
-    }).catch((error:any)=>{
+    }).then(({ data }) => {
+      const status = data.addRequest.status
+      if (status.code >= 0) {
+        this.setState({ status: 'success' })
+      } else {
+        this.setState({ status: 'fail', msg: status.msg })
+      }
+    }).catch((error: any) => {
       console.log('error: ', error)
     })
   }
 
   validate() {
     const validEmail = this.state.email ? emailValidator.validate(this.state.email) : false
-    if(this.state.first && this.state.last) {
+    if (this.state.first && this.state.last) {
       return validEmail && this.state.first.length > 0 && this.state.last.length > 0 && this.state.coc
     } else {
       return false
@@ -152,13 +156,13 @@ class InviteRequest extends React.Component<ChildProps<InviteRequestProps, any>,
     const isValid = this.validate()
     const status = this.state.status;
     let requestStatus = null;
-    if(status != 'neutral') {
+    if (status != 'neutral') {
       requestStatus = <span>Request sent</span>
     }
     let statusMsg = null;
-    if(status == 'success') {
+    if (status == 'success') {
       statusMsg = <div className='alert alert-success'>Success! A request for an invite for  <strong>{this.state.email}</strong> has been received.</div>
-    } else if(status == 'fail') {
+    } else if (status == 'fail') {
       statusMsg = <div className='alert alert-danger'>{this.state.msg}</div>
     }
     return <div>
@@ -168,28 +172,28 @@ class InviteRequest extends React.Component<ChildProps<InviteRequestProps, any>,
       <form className='form' onSubmit={this.onSubmit}>
         <div className='form-group'>
           <label>Email (required)</label>
-          <input name='email' value={this.state.email} onChange={this.onChange} type="text" className='form-control'/>
+          <input name='email' value={this.state.email} onChange={this.onChange} type="text" className='form-control' />
         </div>
 
         <div className='form-group'>
           <label>First name (required)</label>
-          <input name='first' value={this.state.first} onChange={this.onChange} type='text' className='form-control'/>
+          <input name='first' value={this.state.first} onChange={this.onChange} type='text' className='form-control' />
         </div>
 
         <div className='form-group'>
           <label>Last name (required)</label>
-          <input name='last' value={this.state.last} onChange={this.onChange} type='text' className='form-control'/>
+          <input name='last' value={this.state.last} onChange={this.onChange} type='text' className='form-control' />
         </div>
 
         <div className='form-group'>
           <label>Github handle (if you have one)</label>
-          <input name='github' value={this.state.github} onChange={this.onChange} type='text' className='form-control'/>
+          <input name='github' value={this.state.github} onChange={this.onChange} type='text' className='form-control' />
         </div>
 
         <div className='form-group'>
           <div className=''>
-            <input className='checkbox-inline' type='checkbox' onChange={this.onChange} name='coc' checked={this.state.coc}/>
-            <CoC/>
+            <input className='checkbox-inline' type='checkbox' onChange={this.onChange} name='coc' checked={this.state.coc} />
+            <CoC />
           </div>
         </div>
 
@@ -218,23 +222,23 @@ const requestInvite = gql`
 
 const InviteRequestGQL = graphql<any, InviteRequestProps>(requestInvite)(InviteRequest)
 
-class Root extends React.Component<{page: string, user: User}, {}> {
+class Root extends React.Component<{ page: string, user: User }, {}> {
   render() {
     return <div>
       <ApolloProvider client={client}>
-          <Main page={this.props.page} user={this.props.user}/>
+        <Main page={this.props.page} user={this.props.user} />
       </ApolloProvider>
     </div>
   }
 }
 
-declare const page:string
-declare const user:User
-declare const document:any
-declare const window:any
+declare const page: string
+declare const user: User
+declare const document: any
+declare const window: any
 
 function mount_react() {
-  ReactDOM.render(<Root page={page} user={user}/>, document.getElementById('root'))
+  ReactDOM.render(<Root page={page} user={user} />, document.getElementById('root'))
 }
 
 window.onload = mount_react;
