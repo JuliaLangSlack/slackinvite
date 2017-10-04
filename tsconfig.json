@@ -7,11 +7,9 @@
     "pretty": true,
     "watch": true,
     "outDir": "lib",
-    "lib": [
-      "ES2017"
-    ],
-    "jsx": "React",
-    "strict": true
+    "jsx": "react",
+    "strict": true,
+    "lib": ["es2017"]
   },
   "compileOnSave": true
 }

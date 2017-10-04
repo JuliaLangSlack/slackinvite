@@ -1,3 +1,5 @@
 lib
 assets/bundle.js
+assets/bundle.js.map
 node_modules
+secrets
