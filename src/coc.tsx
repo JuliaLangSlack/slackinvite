@@ -3,10 +3,10 @@ import * as React from 'react'
 class CoC extends React.Component {
   render() {
     return <span className='coc'>
-      I agree to adhere to the <a href="https://julialang.org/community/standards/">Julia Code of Conduct</a> in all public channels:
+      I will adhere to the <a href="https://julialang.org/community/standards/">Julia Code of Conduct</a> in all public channels:
       <blockquote>
         <p>
-          <strong>Be respectful and inclusive.</strong>
+          <strong>Be respectful and inclusive. </strong>
           Please do not use overtly sexual language or imagery, and do not attack anyone based on any aspect of personal identity, including gender, sexuality, religion, ethnicity, race, age or ability. Keep in mind that what you write in public forums is read by many people who don’t know you personally, so please refrain from making prejudiced or sexual jokes and comments – even ones that you might consider acceptable in private. Ask yourself if a comment or statement might make someone feel unwelcomed or like an outsider.
         </p>
 

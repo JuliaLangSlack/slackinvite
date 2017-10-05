@@ -35,8 +35,8 @@ class Main extends React.Component<MainProps, {}> {
     return <div>
       <div className='container main'>
         <Footer page={page} user={this.props.user} />
-        <div className='logo'>
-          <a href="http://julialang.org"><img src="/assets/Julia_prog_language.svg" /></a>
+        <div id='logoArea'>
+          <a href="http://julialang.org"><img className='logo' src="/assets/Julia_prog_language.svg" /></a>
         </div>
 
         {inner_content}
@@ -168,36 +168,26 @@ class InviteRequest extends React.Component<ChildProps<InviteRequestProps, any>,
     return <div>
 
       <h1>Slack invite request</h1>
-      {statusMsg}
-      <form className='form' onSubmit={this.onSubmit}>
-        <div className='form-group'>
-          <label>Email (required)</label>
-          <input name='email' value={this.state.email} onChange={this.onChange} type="text" className='form-control' />
-        </div>
+      <form id="inviteForm" onSubmit={this.onSubmit}>
 
-        <div className='form-group'>
-          <label>First name (required)</label>
-          <input name='first' value={this.state.first} onChange={this.onChange} type='text' className='form-control' />
-        </div>
+        <label>Email (required)</label>
+        <input name='email' value={this.state.email} onChange={this.onChange} type="text" />
 
-        <div className='form-group'>
-          <label>Last name (required)</label>
-          <input name='last' value={this.state.last} onChange={this.onChange} type='text' className='form-control' />
-        </div>
+        <label>First name (required)</label>
+        <input name='first' value={this.state.first} onChange={this.onChange} type='text' />
 
-        <div className='form-group'>
-          <label>Github handle (if you have one)</label>
-          <input name='github' value={this.state.github} onChange={this.onChange} type='text' className='form-control' />
-        </div>
+        <label>Last name (required)</label>
+        <input name='last' value={this.state.last} onChange={this.onChange} type='text' />
 
-        <div className='form-group'>
-          <div className=''>
-            <input className='checkbox-inline' type='checkbox' onChange={this.onChange} name='coc' checked={this.state.coc} />
-            <CoC />
-          </div>
-        </div>
+        <label>Github handle (if you have one)</label>
+        <input name='github' value={this.state.github} onChange={this.onChange} type='text' />
 
-        <div className='form-group'>
+        <div id='agreeRow'>
+         <label>Check if you agree: </label> <input type='checkbox' onChange={this.onChange} name='coc' checked={this.state.coc} />
+        </div>
+        <CoC />
+
+        <div id='acceptButton'>
           {statusMsg}
           <button type='submit' className='btn btn-default' disabled={!isValid}>Request invitation</button>
         </div>

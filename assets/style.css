@@ -7,8 +7,8 @@
   margin: auto;
 }
 
-.coc {
-  margin-left: 10px;
+.coc p {
+  text-indent: 20px;
 }
 
 .header {
@@ -18,4 +18,52 @@
 .ping_clause {
   font-weight: bold;
   font-size: 15pt;
+}
+
+#logoArea {
+  display: grid;
+  justify-items: center;
+}
+
+#inviteForm {
+  display: grid;
+  grid-template-columns: max-content auto;
+  align-items: start;
+  grid-gap: 10px;
+}
+
+#agreeRow {
+  display: grid;
+  grid-template-columns: max-content auto;
+  align-items: start;
+  grid-gap: 20px;
+}
+
+#inviteForm input {
+  margin-bottom: 10px;
+}
+
+#inviteForm input[type="text"] {
+  padding: 10px;
+  border: solid 1px #fff;
+  box-shadow: inset 1px 1px 2px 0 #707070;
+  transition: box-shadow 0.1s;
+}
+
+#inviteForm input[type="text"]:focus {
+  box-shadow: inset 1px 1px 2px 0 #c9c9c9;
+}
+
+#acceptButton {
+  grid-column: 2;
+}
+
+@media (max-width: 600px) {
+  #inviteForm {
+    grid-template-columns: 1fr;
+  }
+
+  #acceptButton {
+    grid-column: 1;
+  }
 }
