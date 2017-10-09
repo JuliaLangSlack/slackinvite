@@ -64,8 +64,9 @@ class Footer extends React.Component<{ user: User, page: string }, {}> {
     } else {
       login = <a href='/login'>Login with Github (optional)</a>
     }
-    return <ul className='nav nav-tabs'>
-      <li>{login}</li>
+    return <ul id='topnav'>
+      <li id='login_nav'>{login}</li>
+      <li>test</li>
       <li>{review}</li>
       <li>{logout}</li>
     </ul>

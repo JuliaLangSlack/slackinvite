@@ -67,3 +67,28 @@
     grid-column: 1;
   }
 }
+
+#topnav {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  list-style: none;
+  border-bottom: 1px solid rgba(206, 195, 195, 0.767);
+  padding-bottom: 5px;
+  margin-top: 10px;
+}
+
+@media (max-width: 600px) {
+  #topnav {
+    flex-direction: column;
+  }
+}
+
+#topnav > li {
+  margin-right: 20px;
+}
+
+#login_nav {
+  flex: 1;
+}
+
