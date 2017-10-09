@@ -66,7 +66,6 @@ class Footer extends React.Component<{ user: User, page: string }, {}> {
     }
     return <ul id='topnav'>
       <li id='login_nav'>{login}</li>
-      <li>test</li>
       <li>{review}</li>
       <li>{logout}</li>
     </ul>
