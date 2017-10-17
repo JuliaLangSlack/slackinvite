@@ -3,3 +3,7 @@ assets/bundle.js
 assets/bundle.js.map
 node_modules
 secrets
+.DS_Store
+.sass-cache
+assets/style.css
+assets/style.css.map
