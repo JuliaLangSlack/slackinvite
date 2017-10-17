@@ -2,4 +2,5 @@
 
 npm run build &
 npm run bundle &
+sass --watch src/style.sass:assets/style.css &
 docker-compose -f stack-dev.yml up --build

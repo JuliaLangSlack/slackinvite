@@ -171,25 +171,26 @@ class InviteRequest extends React.Component<ChildProps<InviteRequestProps, any>,
       <form id="inviteForm" onSubmit={this.onSubmit}>
 
         <label>Email (required)</label>
-        <input name='email' value={this.state.email} onChange={this.onChange} type="text" />
+        <input type='email' className='form-control' name='email' value={this.state.email} onChange={this.onChange} type="text" />
 
         <label>First name (required)</label>
-        <input name='first' value={this.state.first} onChange={this.onChange} type='text' />
+        <input className='form-control' name='first' value={this.state.first} onChange={this.onChange} type='text' />
 
         <label>Last name (required)</label>
-        <input name='last' value={this.state.last} onChange={this.onChange} type='text' />
+        <input className='form-control' name='last' value={this.state.last} onChange={this.onChange} type='text' />
 
         <label>Github handle (if you have one)</label>
-        <input name='github' value={this.state.github} onChange={this.onChange} type='text' />
+        <input className='form-control' name='github' value={this.state.github} onChange={this.onChange} type='text' />
 
         <div id='agreeRow'>
-         <label>Check if you agree: </label> <input type='checkbox' onChange={this.onChange} name='coc' checked={this.state.coc} />
+          <label>Check if you agree: </label>
+          <input className='form-check' type='checkbox' onChange={this.onChange} name='coc' checked={this.state.coc} />
         </div>
         <CoC />
 
         <div id='acceptButton'>
           {statusMsg}
-          <button type='submit' className='btn btn-default' disabled={!isValid}>Request invitation</button>
+          <button className='btn btn-primary' type='submit' disabled={!isValid}>Request invitation</button>
         </div>
 
       </form>

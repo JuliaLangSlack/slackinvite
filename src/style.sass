@@ -1,0 +1,85 @@
+$smallScreen: 600px
+$padding: 10px
+
+.main
+    max-width: 1200px
+
+.logo
+    width: 200px
+    margin: auto
+
+.coc
+    p
+        text-indent: 2*$padding
+
+.header
+    font-weight: bold
+
+.ping_clause
+    font-weight: bold
+    font-size: 15pt
+
+#logoArea
+    display: grid
+    justify-items: center
+
+#inviteForm
+    display: grid
+    grid-template-columns: max-content auto
+    align-items: start
+    grid-gap: $padding
+
+#agreeRow
+    display: grid
+    grid-template-columns: max-content auto
+
+#inviteForm
+    input
+        margin-bottom: $padding
+
+#acceptButton
+    grid-column: 2
+
+@media (max-width: $smallScreen)
+    #inviteForm
+        grid-template-columns: 1fr
+
+    #acceptButton
+        grid-column: 1
+
+#topnav
+    diplay: flex
+    flex-direction: row
+    justify-content: flex-end
+    list-style: none
+    border-bottom: 1px solid rgba(206, 195, 195, .767)
+    padding-bottom: 5px
+    margin-top: $padding
+
+@media (max-width: $smallScreen)
+    #topnav
+        flex-direction: column
+
+#topnav
+    li
+        margin-right: 20px
+
+        a
+            text-decoration: none
+            color: #337ab7
+
+        a:hover
+            color: blueviolet
+
+#login_nav
+    flex: 1
+
+blockquote
+    border-left: 5px solid rgb(209, 193, 193)
+    padding-left: 20px
+    margin-left: 0
+
+#agreeRow
+    display: grid
+    grid-template-columns: max-content auto
+    align-items: center
