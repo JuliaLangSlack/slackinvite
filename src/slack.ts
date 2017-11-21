@@ -77,13 +77,13 @@ function setup(app: express.Application, _connection: r.Connection, _secrets: Se
   app.post(`${slack_domain}/gh`, (req, res) => {
     let response: SlashResponse = {}
     const text = req.body.text
-    const matches = text.match(/(.*\/.* )?(\d+)/)
+    const matches = text.match(/^(?:(.+\/.+)(?:\s|#|\/))?#?(\d+)/)
     if (matches === null) {
       response.response_type = 'ephemeral'
       response.text = `Invalid issue number: ${text}`
     } else {
       response.response_type = 'in_channel'
-      response.text = `https://github.com/${matches[1] === null ? "JuliaLang/julia" : matches[1]}/issues/${matches[2]}`
+      response.text = `https://github.com/${matches[1] === undefined ? "JuliaLang/julia" : matches[1]}/issues/${matches[2]}`
     }
     res.type('json')
     res.send(response)
