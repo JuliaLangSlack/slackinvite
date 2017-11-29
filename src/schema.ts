@@ -56,10 +56,10 @@ const InviteRequestType = new GraphQLObjectType({
 const VersionType = new GraphQLObjectType({
   name: 'Version',
   fields: {
-    major: {type: GraphQLInt},
-    minor: {type: GraphQLInt},
-    patch: {type: GraphQLInt},
-    string: {type: GraphQLString}
+    major: { type: GraphQLInt },
+    minor: { type: GraphQLInt },
+    patch: { type: GraphQLInt },
+    string: { type: GraphQLString }
   }
 })
 
@@ -73,6 +73,13 @@ interface Record {
 }
 
 const VERSION = "3.3.0"
+
+interface Version {
+  major: number
+  minor: number
+  patch: number
+  string: string
+}
 
 const QueryType = new GraphQLObjectType({
   name: 'Query',
@@ -101,9 +108,9 @@ const QueryType = new GraphQLObjectType({
     },
     version: {
       type: VersionType,
-      resolve(root, args, context) {
-        const [major, minor, patch] = VERSION.split(".").map(x=>parseInt(x))
-        return {major: major, minor: minor, patch: patch, string: VERSION}
+      resolve(root, args, context): Version {
+        const [major, minor, patch] = VERSION.split(".").map(x => parseInt(x))
+        return { major: major, minor: minor, patch: patch, string: VERSION }
       }
     }
   }
