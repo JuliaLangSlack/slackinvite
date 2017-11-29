@@ -53,6 +53,16 @@ const InviteRequestType = new GraphQLObjectType({
   }
 })
 
+const VersionType = new GraphQLObjectType({
+  name: 'Version',
+  fields: {
+    major: {type: GraphQLInt},
+    minor: {type: GraphQLInt},
+    patch: {type: GraphQLInt},
+    string: {type: GraphQLString}
+  }
+})
+
 interface Record {
   email?: string
   first?: string
@@ -61,6 +71,8 @@ interface Record {
   status?: string
   id?: string
 }
+
+const VERSION = "3.3.0"
 
 const QueryType = new GraphQLObjectType({
   name: 'Query',
@@ -85,6 +97,13 @@ const QueryType = new GraphQLObjectType({
         } else {
           return []
         }
+      }
+    },
+    version: {
+      type: VersionType,
+      resolve(root, args, context) {
+        const [major, minor, patch] = VERSION.split(".").map(x=>parseInt(x))
+        return {major: major, minor: minor, patch: patch, string: VERSION}
       }
     }
   }
