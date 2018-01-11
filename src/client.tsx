@@ -171,7 +171,7 @@ class InviteRequest extends React.Component<ChildProps<InviteRequestProps, any>,
       <form id="inviteForm" onSubmit={this.onSubmit}>
 
         <label>Email (required)</label>
-        <input type='email' className='form-control' name='email' value={this.state.email} onChange={this.onChange} type="text" />
+        <input type='email' className='form-control' name='email' value={this.state.email} onChange={this.onChange}  />
 
         <label>First name (required)</label>
         <input className='form-control' name='first' value={this.state.first} onChange={this.onChange} type='text' />
