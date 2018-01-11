@@ -7,3 +7,4 @@ secrets
 .sass-cache
 assets/style.css
 assets/style.css.map
+deployment/secrets.yaml

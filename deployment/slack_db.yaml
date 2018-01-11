@@ -1,0 +1,32 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: slack-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: slack-invite
+      role: db
+  template:
+    metadata:
+      labels:
+        app: slack-invite
+        role: db
+    spec:
+      containers:
+        - name: db
+          image: rethinkdb:2.3.6
+          volumeMounts:
+          - mountPath: /data
+            name: db-volume
+          ports:
+          - containerPort: 8080
+            name: webui
+          - containerPort: 28015
+            name: db
+      volumes:
+        - name: db-volume
+          hostPath:
+            type: DirectoryOrCreate
+            path: /data

@@ -4,6 +4,7 @@ import * as request from 'request'
 import * as querystring from 'querystring'
 import { User } from './types'
 import * as express from 'express'
+import {db_name} from './db'
 
 interface Secrets {
   admin_id: string
@@ -28,7 +29,7 @@ interface InviteRequest {
 async function send_invite(user: User) {
   let req: InviteRequest = {}
   req.email = user.email
-  const tokenCursor = await r.table('slack_tokens').filter({ user_id: secrets!.admin_id }).orderBy(r.desc('create_date')).run(connection!)
+  const tokenCursor = await r.db(db_name).table('slack_tokens').filter({ user_id: secrets!.admin_id }).orderBy(r.desc('create_date')).run(connection!)
   const tokens = await tokenCursor.toArray()
   const token = tokens[0].token
   req.token = token
@@ -120,7 +121,7 @@ function setup(app: express.Application, _connection: r.Connection, _secrets: Se
         console.log(`Error with Slack OAuth: ${JSON.stringify(body)}`)
         res.redirect('/')
       } else {
-        r.table('slack_tokens').insert({ token: body.access_token, user_id: body.user_id, scope: body.scope, team_name: body.team_name, team_id: body.team_id, create_date: r.now() }).run(connection!)
+        r.db(db_name).table('slack_tokens').insert({ token: body.access_token, user_id: body.user_id, scope: body.scope, team_name: body.team_name, team_id: body.team_id, create_date: r.now() }).run(connection!)
         res.redirect('/')
       }
     })

@@ -1,0 +1,33 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: slack-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: slack-invite
+      role: frontend
+  template:
+    metadata:
+      labels:
+        app: slack-invite
+        role: frontend
+        time: "528"
+    spec:
+      containers:
+        - name: frontend
+          image: malmaud/juliaslack:3.4
+          ports:
+          - containerPort: 4000
+          volumeMounts:
+          - name: secrets
+            mountPath: /secrets
+            readOnly: true
+      volumes:
+        - name: secrets
+          secret:
+            secretName: slack-secrets
+            items:
+            - key: secrets
+              path: secrets.json

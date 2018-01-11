@@ -14,7 +14,7 @@ import * as Auth from './auth'
 import * as Email from './email'
 import * as Slack from './slack'
 import { User, StatusCode } from './types'
-
+import {db_name} from './db'
 
 const StatusType = new GraphQLObjectType({
   name: 'Status',
@@ -88,7 +88,7 @@ const QueryType = new GraphQLObjectType({
       type: new GraphQLList(InviteRequestType),
       async resolve(root, args, context) {
         if (await Auth.review_authorized(context.user)) {
-          const cursor = await r.table('invites').run(context.connection)
+          const cursor = await r.db(db_name).table('invites').run(context.connection)
           const requests: Record[] = await cursor.toArray()
           let res = []
           for (let request of requests) {
@@ -146,9 +146,9 @@ function send_status_email(record: Record) {
 }
 
 async function insert_request(connection: r.Connection, { email, first, last, github }: Record) {
-  const n_prev_users: number = await (r.table('invites') as any)('email').count(email).run(connection)
+  const n_prev_users: number = await (r.db(db_name).table('invites') as any)('email').count(email).run(connection)
   if (n_prev_users == 0) {
-    const res = await r.table('invites').insert({ email, first, last, github, status: 'ACCEPTED', time: r.now() }).run(connection)
+    const res = await r.db(db_name).table('invites').insert({ email, first, last, github, status: 'ACCEPTED', time: r.now() }).run(connection)
     //send_invite_mail()
 
     const status = {
@@ -207,11 +207,11 @@ const MutationType = new GraphQLObjectType({
           return { status: { code: -2, msg: "Not authorized" } }
         }
         const conn = context.connection
-        const status_change = r.table('status_changes').insert({ status: status, request_id: id, user_id: context.user.id, time: r.now() }).run(conn)
-        const invite_add = r.table('invites').get(id).update({ status: status }).run(conn)
+        const status_change = r.db(db_name).table('status_changes').insert({ status: status, request_id: id, user_id: context.user.id, time: r.now() }).run(conn)
+        const invite_add = r.db(db_name).table('invites').get(id).update({ status: status }).run(conn)
         await status_change
         await invite_add
-        const record: Record = (await r.table('invites').get(id).run(conn)) as any
+        const record: Record = (await r.db(db_name).table('invites').get(id).run(conn)) as any
         send_status_email(record)
         const request = { id: record.id, email: record.email, status: StatusCode[record.status as keyof typeof StatusCode], name: { first: record.first, last: record.last }, github: record.github }
         return { status: { code: 0, msg: 'OK' }, request: request }

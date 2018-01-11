@@ -1,6 +1,7 @@
 import * as _ from 'lodash'
 import * as r from 'rethinkdb'
 import { User } from './types'
+import {db_name} from './db'
 
 let conn: r.Connection | null = null
 
@@ -23,7 +24,7 @@ async function review_authorized(user: User): Promise<boolean> {
   if (user == null) return false
   if (user.login == null) return false
   const login = user.login
-  const admins_cursor = await r.table('admins').run(conn!)
+  const admins_cursor = await r.db(db_name).table('admins').run(conn!)
   const records: Record[] = await admins_cursor.toArray()
   const admins = records.map(record => { return record['github'] })
   return _.includes(admins, login)

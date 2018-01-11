@@ -15,21 +15,22 @@ import * as Auth from './auth'
 import * as Email from './email'
 import * as Slack from './slack'
 import { User } from './types'
+import {db_name} from './db'
 
 let connection: r.Connection | null = null
-let db_name = 'test'
 
 async function ensure_tables(names: string[]) {
-  const tables = await r.db(db_name).tableList().run(connection!)
-  let promises = []
-  for (let name of names) {
-    if (!_.includes(tables, name)) {
-      promises.push(r.db(db_name).tableCreate(name).run(connection!))
-    }
-  }
-  for (let promise of promises) {
-    await promise
-  }
+
+  // const tables = await r.db(db_name).tableList().run(connection!)
+  // let promises = []
+  // for (let name of names) {
+  //   if (!_.includes(tables, name)) {
+  //     promises.push(r.db(db_name).tableCreate(name).run(connection!))
+  //   }
+  // }
+  // for (let promise of promises) {
+  //   await promise
+  // }
 }
 
 function timeout(ms: number) {
@@ -81,7 +82,7 @@ async function init() {
   console.log('Initializing db')
   while (true) {
     try {
-      connection = await r.connect({ host: 'db', port: 28015 })
+      connection = await r.connect({ host: 'slack-db', port: 28015 })
       break
     } catch (err) {
       console.log(`Error connecting to db: ${err}`)
@@ -115,7 +116,7 @@ async function init() {
       res.cookie('session', session)
     }
     (<any>req).session = session
-    let user_cursor = await r.table('sessions').filter({ session }).run(connection!)
+    let user_cursor = await r.db(db_name).table('sessions').filter({ session }).run(connection!)
     let users: User[] = await user_cursor.toArray()
     if (users.length > 0) {
       req.user = users[0]
@@ -212,13 +213,13 @@ async function init() {
             github_token: token
           }
           if (user == null) {
-            await r.table('sessions').insert(record).run(connection!)
+            await r.db(db_name).table('sessions').insert(record).run(connection!)
             res.redirect('/')
           } else {
             if (user.id == null) {
               throw ("User id field is missing")
             } else {
-              await r.table('sessions').get(user.id).update(record).run(connection!)
+              await r.db(db_name).table('sessions').get(user.id).update(record).run(connection!)
             }
             res.redirect('/')
           }

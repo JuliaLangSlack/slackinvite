@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: slack-db
+spec:
+  selector:
+    app: slack-invite
+    role: db
+  ports:
+    - targetPort: webui
+      port: 8080
+      name: db-webui
+    - targetPort: db
+      port: 28015
+      name: db
+  type: NodePort
