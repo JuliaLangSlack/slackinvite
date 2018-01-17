@@ -23,8 +23,16 @@ type InviteRequest {
   github: String
 }
 
+type Version {
+  major: Int
+  minor: Int
+  patch: Int
+  string: String
+}
+
 type Query {
   getRequests: [InviteRequest]
+  version: Version
 }
 
 type RequestStatus {
