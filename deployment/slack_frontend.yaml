@@ -13,10 +13,11 @@ spec:
       labels:
         app: slack-invite
         role: frontend
-        time: "528"
+        time: "543"
     spec:
       containers:
         - name: frontend
+          imagePullPolicy: Always
           image: malmaud/juliaslack:3.4
           ports:
           - containerPort: 4000
