@@ -13,20 +13,23 @@ spec:
       labels:
         app: slack-invite
         role: ssl
-        time: "1128"
+        time: "527"
     spec:
       containers:
         - name: ssl
           image: malmaud/juliaslackssl:1.0
           imagePullPolicy: Always
-          ports:
-          - containerPort: 80
-            hostPort: 80
           volumeMounts:
             - mountPath: /etc/letsencrypt
               name: ssl-volume
+            - name: acme-challenge
+              mountPath: /var/www/letsencrypt
       volumes:
         - name: ssl-volume
           hostPath:
             type: DirectoryOrCreate
             path: /etc/letsencrypt
+        - name: acme-challenge
+          hostPath:
+            type: DirectoryOrCreate
+            path: /etc/acme

@@ -27,6 +27,6 @@ spec:
             name: db
       volumes:
         - name: db-volume
-          hostPath:
-            type: DirectoryOrCreate
-            path: /data
+          gcePersistentDisk:
+            pdName: malmadisk
+            fsType: ext4

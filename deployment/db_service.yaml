@@ -13,4 +13,4 @@ spec:
     - targetPort: db
       port: 28015
       name: db
-  type: NodePort
+  type: ClusterIP
