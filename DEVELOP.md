@@ -19,11 +19,3 @@ Run the bundler with
 and the typescript compiler with
 
 `npm run build`
-
-
-## Docker environment
-
-Run
-
-`docker-compose -f stack-dev.yml up`
-
