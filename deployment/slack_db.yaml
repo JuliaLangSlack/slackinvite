@@ -27,6 +27,5 @@ spec:
             name: db
       volumes:
         - name: db-volume
-          gcePersistentDisk:
-            pdName: malmadisk
-            fsType: ext4
+          persistentVolumeClaim:
+            claimName: db-disk
