@@ -28,4 +28,4 @@ spec:
       volumes:
         - name: db-volume
           persistentVolumeClaim:
-            claimName: db-disk
+            claimName: slack-db-disk

@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: db-disk
+  name: slack-db-disk
 spec:
   resources:
     requests:
