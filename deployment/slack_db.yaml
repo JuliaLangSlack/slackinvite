@@ -25,6 +25,9 @@ spec:
             name: webui
           - containerPort: 28015
             name: db
+          resources:
+            limits:
+              cpu: "0m"
       volumes:
         - name: db-volume
           persistentVolumeClaim:
