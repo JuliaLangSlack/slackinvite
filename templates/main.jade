@@ -3,6 +3,13 @@ html
   head
     meta(charset='utf-8')
     meta(name='viewport' content='width=device-width, initial-scale=1, user-scalable=no, maximum-scale=1')
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-1123761-12"></script>
+    script.
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-1123761-12');
     script(src='/assets/bundle.js')
     link(rel='stylesheet' href='/assets/style.css')
   <link rel="stylesheet" href="/assets/bootstrap.min.css" crossorigin="anonymous">
